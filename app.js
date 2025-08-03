@@ -8,9 +8,7 @@ const  uploadFile  = require("./utility/fileUploads");
 const uploads = require("./utility/multerConfig");
 require("dotenv").config();
 
-app.get('/', (req, res) => {
-  res.send('API is working');
-});
+
 
 mongoose.connect(process.env.DB_url).then(() => {
     console.log("Connected to the database");
@@ -44,4 +42,6 @@ app.get("/normalize", async (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server has started on port ${PORT}`);
 });
-
+app.get('/', (req, res) => {
+  res.send('API is working');
+});
