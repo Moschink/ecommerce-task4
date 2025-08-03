@@ -3,7 +3,7 @@ const todoRouter = require("./router/router");
 const authRouter = require("./router/userRouter");
 const mongoose = require("mongoose");
 const userModel = require("./schema/user");
-
+const PORT = process.env.PORT || 3000;
 const  uploadFile  = require("./utility/fileUploads");
 const uploads = require("./utility/multerConfig");
 require("dotenv").config();
