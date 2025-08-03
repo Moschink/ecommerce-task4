@@ -8,6 +8,10 @@ const  uploadFile  = require("./utility/fileUploads");
 const uploads = require("./utility/multerConfig");
 require("dotenv").config();
 
+app.get('/', (req, res) => {
+  res.send('API is working');
+});
+
 mongoose.connect(process.env.DB_url).then(() => {
     console.log("Connected to the database");
 }).catch((err) => {
