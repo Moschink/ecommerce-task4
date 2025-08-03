@@ -37,7 +37,7 @@ app.get("/normalize", async (req, res) => {
     res.send("Done")
 });
 
-app.listen(3000, () => {
-    console.log("Server has started on port 3000");
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server has started on port ${PORT}`);
 });
 
