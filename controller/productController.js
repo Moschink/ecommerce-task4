@@ -23,7 +23,7 @@ const addNewproduct = async (req, res) => {
     productImage = req.body.productImage;
 
     const newProduct = await productModel.create({
-        productName, description, cost, productImage, ownerId: req.decoded.userId
+        productName, description, cost, productImage, ownerId: req.decoded.ownerId
     });
 
     // transporter.sendMail({

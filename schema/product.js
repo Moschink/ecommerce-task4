@@ -18,7 +18,7 @@ const schema = new mongoose.Schema({
     }],
     ownerId: {
         type: mongoose.Types.ObjectId,
-        ref: "admin",  // Reference to your user model
+        ref: "customer",  // Reference to your user model
         required: true
     },
     stockStatus: {
