@@ -22,6 +22,7 @@ app.use(express.json());
 
 app.use("/auth", authRouter);
 app.use("/product", todoRouter);
+app.use("/brand", todoRouter);
 
 app.post("/file-uploads", uploads.single("file"), async (req, res) => {
     console.log("file properties", req.file);
@@ -39,7 +40,7 @@ app.get("/normalize", async (req, res) => {
     res.send("Done")
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, () => {
     console.log(`Server has started on port ${PORT}`);
 });
 app.get('/', (req, res) => {
