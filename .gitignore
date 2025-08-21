@@ -4,6 +4,8 @@
 
 .env
 schema/otp.js
+schema/brand.js
 utility/generateOTP.js
 utility/sendEmail.js
 otp.js
+

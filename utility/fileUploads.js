@@ -31,7 +31,7 @@ const uploadFile = async (file) => {
     });
     const response = await S3.send(command);
     if(response.$metadata.httpStatusCode === 200){
-    const fileUploaded = `https://new-product.t3.storage.dev${fileName}`
+    const fileUploaded = `https://new-product.t3.storage.dev/${fileName}`
     return {error: null, fileUploaded};
     } else {
         return error;
