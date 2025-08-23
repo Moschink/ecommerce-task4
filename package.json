@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-      "test:class": "jest ./__tests__/testClass",
+    "dev": "nodemon",
+    "test:class": "jest ./__tests__/testClass",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -25,6 +26,7 @@
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.1",
+    "mongoose-paginate-v2": "^1.9.1",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.3",
     "nodemon": "^3.1.10",

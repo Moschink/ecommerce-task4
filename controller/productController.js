@@ -1,11 +1,24 @@
 // const transporter = require("../utility/sendEmail");
 const productModel = require("../schema/product");
+const brandModel = require("../schema/brand");
+
 const joi = require("joi");
 
 const getAllproducts = async (req, res) => {
     try {
+
+        const {page, limit} = req.params;
         console.log("get decoded value",req.decoded);
-        const product = await productModel.find({});
+        const product = await productModel.paginate({},{
+    page: (page && isNaN(page) == false) ? parseInt(page) : 1, 
+    limit: (limit && isNaN(limit) == false) ? parseInt(limit) : 2,
+    populate: [
+        {
+            path: "brandId",
+            select: "-brandName -ownerId -createdAt -updatedAt -brandId -__v"
+        }
+    ]
+  });
         res.send(product);
     } catch (error) {
         res.status(500).send({
@@ -17,13 +30,22 @@ const getAllproducts = async (req, res) => {
 
 const addNewproduct = async (req, res) => {
     
+    // const brandId = req.body.brandId;
     const productName = req.body.productName;
+    const brandId = req.body.brandId;
     const description = req.body.description;
     const cost = req.body.cost;
     productImage = req.body.productImage;
 
+    const brand = await brandModel.findById(brandId);
+        if (!brand) {
+            return res.status(404).json({
+                error: "Brand not found"
+            });
+        }
+    
     const newProduct = await productModel.create({
-        productName, description, cost, productImage, ownerId: req.decoded.ownerId
+        productName, brandId: brandId, description, cost, productImage, ownerId: req.decoded.ownerId
     });
 
     // transporter.sendMail({
@@ -45,7 +67,7 @@ const addNewproduct = async (req, res) => {
 const viewSingleproduct = async (req, res) => {
     const id = req.params.id;
 
-    const product = await productModel.findById(id);
+    const product = await productModel.findById(id).populate("userId","fullName email");
 
     if(!product) {
         res.status(404).send({

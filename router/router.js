@@ -10,18 +10,17 @@ const roleBasedAccess = require("../middleware/roleBasedAccess");
 router.use(checkedIfLoggedIn);
 // product Router
 
-router.get("/", productController.getAllproducts);
+router.get("/:page/:limit", productController.getAllproducts);
 router.post("/product", roleBasedAccess(["admin"]), productController.addNewproduct);
 router.get("/single/:id", productController.viewSingleproduct);
 router.patch("/:id", roleBasedAccess(["admin"]), productController.updateproductStatus);
 router.delete("/:id", roleBasedAccess(["admin"]),productController.deleteproduct);
 
-//Brand Route
 
-router.post("/new", roleBasedAccess(["admin"]),brandController.addNewBrand);
-router.patch("/:id", brandController.updateBrand);
+router.post("/new", brandController.addNewBrand);
+router.put("/:id", brandController.updateBrand);
 router.get("/view", brandController.getAllBrands);
-router.delete("delete/:id", brandController.deleteBrand);
+router.delete("/delete/:id", roleBasedAccess(["admin"]), brandController.deleteBrand);
 
 
 

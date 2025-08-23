@@ -20,9 +20,10 @@ const app = express();
 
 app.use(express.json());
 
+app.use("/brand", todoRouter);
 app.use("/auth", authRouter);
 app.use("/product", todoRouter);
-app.use("/brand", todoRouter);
+
 
 app.post("/file-uploads", uploads.single("file"), async (req, res) => {
     console.log("file properties", req.file);
