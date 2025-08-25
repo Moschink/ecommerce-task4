@@ -17,7 +17,7 @@ router.patch("/:id", roleBasedAccess(["admin"]), productController.updateproduct
 router.delete("/:id", roleBasedAccess(["admin"]),productController.deleteproduct);
 
 
-router.post("/new", brandController.addNewBrand);
+router.post("/new", roleBasedAccess(["admin"]), brandController.addNewBrand);
 router.put("/:id", brandController.updateBrand);
 router.get("/view", brandController.getAllBrands);
 router.delete("/delete/:id", roleBasedAccess(["admin"]), brandController.deleteBrand);
