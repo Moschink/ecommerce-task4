@@ -89,11 +89,6 @@ const deleteBrand = async (req, res) => {
   }
 };
 
-
-
-
-module.exports = deleteBrand;
-
 module.exports = { 
     addNewBrand,
     updateBrand,

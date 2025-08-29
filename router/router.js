@@ -5,11 +5,17 @@ const checkedIfLoggedIn = require("../middleware/checkedIfLoggedIn");
 const productController = require("../controller/productController");
 const orderController = require("../controller/orderController");
 const brandController = require("../controller/brandController");
+const profileController = require("../controller/profileController");
 
 const roleBasedAccess = require("../middleware/roleBasedAccess");
 
 
 router.use(checkedIfLoggedIn);
+
+
+//Profile & Oder-History routel
+router.get("/order-history", profileController.orderHistory);
+router.get("/profile", profileController.profile);
 
 
 // PRODUCT routes
@@ -30,7 +36,6 @@ router.post("/brands", roleBasedAccess(["admin"]), brandController.addNewBrand);
 router.put("/brands/:id", brandController.updateBrand);
 router.get("/brands", brandController.getAllBrands);
 router.delete("/brands/:id", roleBasedAccess(["admin"]), brandController.deleteBrand);
-
 
 
 

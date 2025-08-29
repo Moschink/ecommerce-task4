@@ -2,57 +2,71 @@ const productModel = require("../schema/product");
 const orderModel = require("../schema/order");
 const joi = require("joi");
 
+let io; // we’ll assign this later
+
+// function to set io from server.js
+const setSocket = (_io) => {
+  io = _io;
+};
+
+// CREATE ORDER
 const createOrder = async (req, res) => {
   try {
-    const { productName, productId, quantity, totalCost, shippingStatus } = req.body;
+    const { productId, quantity } = req.body;
 
-    // Validate product existence
-    const product = await productModel.findById(productId);
-    if (!product) {
-      return res.status(404).json({
-        error: "Product not found",
-      });
+    if (!productId || !quantity) {
+      return res.status(400).json({ message: "productId and quantity are required" });
     }
 
-    // Create order
+    const product = await productModel.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const totalCost = product.cost * quantity;
+
     const newOrder = await orderModel.create({
-      productName,
-      productId,
-      quantity,
-      totalCost,
-      shippingStatus, // must match enum: pending | shipped | delivered
       ownerId: req.decoded.ownerId,
+      productId: product._id,
+      productName: product.productName,
+      productDescription: product.description,
+      totalCost,
+      quantity,
+      shippingStatus: "pending",
     });
 
-    res.status(201).send({
-      message: "Order added successfully",
-      newOrder,
+    // Emit event for new order (optional)
+    io.emit("notification", {
+      title: "New order created",
+      message: `Order for ${product.productName} has been placed.`,
+      order: newOrder,
+    });
+
+    res.status(201).json({
+      message: "Order created successfully",
+      order: newOrder,
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ message: err.message });
   }
 };
 
-
 const getAllOrders = async (req, res) => {
-    try {
-        console.log("get decoded value",req.decoded);
-        const orders = await orderModel.find({});
-        res.send(orders);
-    } catch (error) {
-        res.status(500).send({
-            error
-        });
-    }
-}
+  try {
+    console.log("get decoded value", req.decoded);
+    const orders = await orderModel.find({});
+    res.send(orders);
+  } catch (error) {
+    res.status(500).send({ error });
+  }
+};
+
 const getOrder = async (req, res) => {
-  const id = req.params.id; // <-- use params, not body
+  const id = req.params.id;
 
   try {
     console.log("get decoded value", req.decoded);
-
-    const order = await orderModel.findById(id); // <-- pass id directly
+    const order = await orderModel.findById(id);
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
@@ -65,43 +79,35 @@ const getOrder = async (req, res) => {
   }
 };
 
-
-
-
 const updateShippingStatus = async (req, res) => {
   try {
     const id = req.params.id;
     const shippingStatus = req.body.shippingStatus;
 
-    // Joi validation for shippingStatus
-    const schema = joi
-      .string()
-      .valid("pending", "shipped", "delivered")
-      .required();
-
+    const schema = joi.string().valid("pending", "shipped", "delivered").required();
     const { error } = schema.validate(shippingStatus);
 
     if (error) {
-      return res.status(422).send({
-        message: error.message,
-      });
+      return res.status(422).send({ message: error.message });
     }
 
-    // Check if product exists
     const doesOrderExist = await orderModel.findById(id);
-
     if (!doesOrderExist) {
-      return res.status(404).send({
-        message: "Order does not exist",
-      });
+      return res.status(404).send({ message: "Order does not exist" });
     }
 
-    // Update shippingStatus
     const order = await orderModel.findByIdAndUpdate(
       id,
-      { shippingStatus: shippingStatus }, // <-- Correct field
+      { shippingStatus },
       { new: true }
     );
+
+    // Use io (not socket)
+    io.emit("notification", {
+      title: "New shipping status",
+      message: `Your order ${order.productName} shipping status has been updated to ${shippingStatus}`,
+      order,
+    });
 
     return res.send({
       message: "Shipping status updated successfully",
@@ -109,17 +115,14 @@ const updateShippingStatus = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).send({
-      message: "Internal server error",
-    });
+    return res.status(500).send({ message: "Internal server error" });
   }
 };
 
-        
-
-module.exports = { 
-    createOrder,
-    getOrder,
-    getAllOrders,
-    updateShippingStatus
-}
+module.exports = {
+  createOrder,
+  getOrder,
+  getAllOrders,
+  updateShippingStatus,
+  setSocket, // export this so you can set io in server.js
+};
