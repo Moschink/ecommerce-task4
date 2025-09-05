@@ -1,13 +1,8 @@
 const productModel = require("../schema/product");
 const orderModel = require("../schema/order");
 const joi = require("joi");
+const { notifyUser } = require("../socket"); 
 
-let io; // we’ll assign this later
-
-// function to set io from server.js
-const setSocket = (_io) => {
-  io = _io;
-};
 
 // CREATE ORDER
 const createOrder = async (req, res) => {
@@ -36,11 +31,11 @@ const createOrder = async (req, res) => {
     });
 
     // Emit event for new order (optional)
-    io.emit("notification", {
-      title: "New order created",
-      message: `Order for ${product.productName} has been placed.`,
-      order: newOrder,
-    });
+    // io.emit("notification", {
+    //   title: "New order created",
+    //   message: `Order for ${product.productName} has been placed.`,
+    //   order: newOrder,
+    // });
 
     res.status(201).json({
       message: "Order created successfully",
@@ -79,6 +74,8 @@ const getOrder = async (req, res) => {
   }
 };
 
+
+
 const updateShippingStatus = async (req, res) => {
   try {
     const id = req.params.id;
@@ -86,14 +83,8 @@ const updateShippingStatus = async (req, res) => {
 
     const schema = joi.string().valid("pending", "shipped", "delivered").required();
     const { error } = schema.validate(shippingStatus);
-
     if (error) {
       return res.status(422).send({ message: error.message });
-    }
-
-    const doesOrderExist = await orderModel.findById(id);
-    if (!doesOrderExist) {
-      return res.status(404).send({ message: "Order does not exist" });
     }
 
     const order = await orderModel.findByIdAndUpdate(
@@ -102,12 +93,17 @@ const updateShippingStatus = async (req, res) => {
       { new: true }
     );
 
-    // Use io (not socket)
-    io.emit("notification", {
-      title: "New shipping status",
-      message: `Your order ${order.productName} shipping status has been updated to ${shippingStatus}`,
-      order,
-    });
+    if (!order) {
+      return res.status(404).send({ message: "Order not found" });
+    }
+
+  
+   notifyUser(order.ownerId.toString(), { 
+  orderId: order._id,
+  shippingStatus,
+  message: `Hello ${order.ownerId}, your order status has been updated`
+});
+
 
     return res.send({
       message: "Shipping status updated successfully",
@@ -119,10 +115,11 @@ const updateShippingStatus = async (req, res) => {
   }
 };
 
+
 module.exports = {
   createOrder,
   getOrder,
   getAllOrders,
   updateShippingStatus,
-  setSocket, // export this so you can set io in server.js
+ // export this so you can set io in server.js
 };
